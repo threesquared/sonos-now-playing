@@ -1,50 +1,67 @@
-'use strict';
+import express from 'express';
+import expressWs from 'express-ws';
+import path from 'path';
+import { SonosManager, SonosEvents, SonosDevice } from '@svrooij/sonos'
 
-const express = require('express');
-const path = require('path');
-const { Sonos, AsyncDeviceDiscovery } = require('sonos');
-const app = express();
+const app = expressWs(express()).app;
+const manager = new SonosManager()
 
-const deviceName = process.env.SONOS_DEVICE_NAME || 'Living Room'
+const PORT = process.env.PORT || 8080;
+const deviceName = process.env.SONOS_DEVICE_NAME || 'Dining Room'
 
-async function main() {
-  const discovery = new AsyncDeviceDiscovery()
+/** @type {SonosDevice} */
+let sonosSpeaker;
 
-  console.log('Discovering sonos devices...')
+console.log('Discovering sonos devices...')
 
-  // const devices = await discovery.discoverMultiple({ timeout: 5000 })
+await manager.InitializeWithDiscovery(10);
 
-  // devices.forEach(device => {
-  //   if (device.name === deviceName) {
-  //     sonosSpeaker = new Sonos(device.host)
-  //   }
-  // })
-
-  const sonosSpeaker = new Sonos('192.168.0.172'); // TODO: Remove me
-
-  if (!sonosSpeaker) {
-    console.error('No Sonos device found with name %s', deviceName)
-    process.exit(1)
+manager.Devices.forEach(device => {
+  if (device.Name === deviceName) {
+    sonosSpeaker = device
   }
+})
 
-  app.get('/status', async (req, res) => {
-    const track = await sonosSpeaker.currentTrack();
-
-    res.writeHead(200, {
-      'Content-Type': 'application/json'
-    })
-
-    res.end(JSON.stringify(track));
-  });
-
-  app.use(express.static(path.join(__dirname, '../app')));
-
-  const PORT = process.env.PORT || 8080;
-
-  app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
-      console.log('Press Ctrl+C to quit.');
-  });
+if (!sonosSpeaker) {
+  console.error('No Sonos device found with name %s', deviceName)
+  process.exit(1)
 }
 
-main();
+sonosSpeaker.Events.on(SonosEvents.Error, (err) => {
+  console.error('Error subscribing to speaker events', err);
+});
+
+app.ws('/ws', async function(ws, req) {
+  console.log("Websocket client connected");
+
+  ws.send(JSON.stringify(await sonosSpeaker.GetState()));
+
+  const trackChangeListener = async (trachUri) => {
+    console.log('Track changed', trachUri);
+    ws.send(JSON.stringify(await sonosSpeaker.GetState()));
+  }
+
+  sonosSpeaker.Events.on(SonosEvents.CurrentTrackUri, trackChangeListener)
+
+  ws.on('close', function() {
+    console.log('Websocket client disconnected');
+
+    sonosSpeaker.Events.removeListener(SonosEvents.CurrentTrackUri, trackChangeListener)
+  });
+});
+
+app.use(express.static(path.join(path.resolve(), '../app')));
+
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+  console.log('Press Ctrl+C to quit.');
+});
+
+process.on('SIGINT', () => {
+  console.log('Cancelling all subscriptions')
+  sonosSpeaker.CancelEvents();
+
+  setTimeout(() => {
+    process.exit(0)
+  }, 3000)
+})

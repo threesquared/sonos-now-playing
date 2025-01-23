@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="desc">
+    <meta name="keywords" content="content">
+    <title>Now Playing</title>
+    <style>
+      html {
+        height: 100%;
+        background-color: black;
+      }
+
+      body {
+        height: 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      #bar {
+        width:500px;
+        float:right;
+        top:-40px;
+        background-color: rgba(255,255,255,0.5);
+      }
+
+      #bar div {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bar">
+      <div id="artist"></div>
+      <div id="title"></div>
+    </div>
+    <script>
+      function startWebsocket() {
+        const ws = new WebSocket('ws://localhost:8080/ws');
+
+        ws.onmessage = (message) => {
+          const sonosData = JSON.parse(message.data);
+          console.log('Message received', sonosData)
+
+          document.body.style.backgroundImage = `url('${sonosData.positionInfo.TrackMetaData.AlbumArtUri}')`;
+          document.getElementById("artist").innerHTML = sonosData.positionInfo.TrackMetaData.Artist;
+          document.getElementById("title").innerHTML = sonosData.positionInfo.TrackMetaData.Title;
+        }
+
+        ws.onclose = function(err) {
+          console.log('Socket closed. Attempting to reconnect...', err);
+          setTimeout(startWebsocket, 1000);
+        };
+
+        ws.onerror = function(err) {
+          console.error('Socket error', err);
+          ws.close();
+        };
+      }
+
+      (() => {
+        startWebsocket();
+      })()
+    </script>
+  </body>
+</html>
