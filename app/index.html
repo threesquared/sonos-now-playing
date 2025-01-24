@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="desc">
     <meta name="keywords" content="content">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
     <title>Now Playing</title>
     <style>
       html {
@@ -18,36 +23,89 @@
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
+        overflow: hidden;
       }
 
-      #bar {
-        width:500px;
-        float:right;
-        top:-40px;
-        background-color: rgba(255,255,255,0.5);
+      .bar {
+        right: -5000px;
+        bottom: 0;
+        position: absolute;
+        background-color: rgba(0,0,0,0.8);
+        font-family: "Merriweather", serif;
+        font-size: xx-large;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+        color: #FAF9F6;
+        margin-bottom: 10%;
+        padding: 20px;
+        padding-right: 100px;
+        transition: right 4.8s ease-in-out;
       }
 
-      #bar div {
-        padding: 10px;
+      .bar.open {
+        right: 0;
+      }
+
+      #artist {
+        padding-bottom: 10px;
       }
     </style>
   </head>
-  <body>
-    <div id="bar">
+  <body id="body">
+    <div class="bar open">
       <div id="artist"></div>
       <div id="title"></div>
     </div>
     <script>
+      function listenForGestures() {
+        const gesuredZone = document.getElementById('body');
+
+        gesuredZone.addEventListener('touchstart', function(event) {
+            touchstartX = event.screenX;
+            touchstartY = event.screenY;
+        }, false);
+
+        gesuredZone.addEventListener('touchend', function(event) {
+            touchendX = event.screenX;
+            touchendY = event.screenY;
+            handleGesure();
+        }, false);
+
+        function handleGesure() {
+          if (touchendX < touchstartX) {
+              alert('left!');
+          }
+          if (touchendX > touchstartX) {
+              alert('right!');
+          }
+          if (touchendY == touchstartY) {
+              alert('tap!');
+          }
+        }
+      }
+
+      function newTrack(sonosData) {
+        document.querySelector('.bar').classList.toggle('open');
+
+        let img = new Image();
+
+        img.onload = () => {
+          document.body.style.backgroundImage = `url('${ img.src }')`;
+
+          document.getElementById("artist").innerHTML = sonosData.positionInfo.TrackMetaData.Artist;
+          document.getElementById("title").innerHTML = sonosData.positionInfo.TrackMetaData.Title;
+          document.querySelector('.bar').classList.toggle('open');
+        };
+
+        img.src = sonosData.positionInfo.TrackMetaData.AlbumArtUri;
+      }
+
       function startWebsocket() {
         const ws = new WebSocket('ws://localhost:8080/ws');
 
         ws.onmessage = (message) => {
-          const sonosData = JSON.parse(message.data);
-          console.log('Message received', sonosData)
-
-          document.body.style.backgroundImage = `url('${sonosData.positionInfo.TrackMetaData.AlbumArtUri}')`;
-          document.getElementById("artist").innerHTML = sonosData.positionInfo.TrackMetaData.Artist;
-          document.getElementById("title").innerHTML = sonosData.positionInfo.TrackMetaData.Title;
+          newTrack(JSON.parse(message.data));
         }
 
         ws.onclose = function(err) {
@@ -63,6 +121,7 @@
 
       (() => {
         startWebsocket();
+        listenForGestures();
       })()
     </script>
   </body>

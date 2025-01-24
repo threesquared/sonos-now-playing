@@ -1,11 +1,11 @@
 {
-  "name": "server",
+  "name": "sonos-now-playing-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Display current playing artwork on a Raspberry Pi screen",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
