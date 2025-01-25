@@ -4,28 +4,23 @@
 
 ## Installation
 
-Install chromium and check out this repository:
+Install dependencies and check out this repository:
 
 ```bash
-sudo apt-get install chromium
+sudo apt-get install git chromium-browser
 
 git clone https://github.com/threesquared/sonos-now-playing.git
-cd sonos-now-playing/server
+cd sonos-now-playing
+
 npm install
 ```
 
-## Running
+## Autostart
 
-Create this file at `~/.config/lxsession/LXDE-pi/autostart` to autostart the service:
+Create a file at `~/.config/labwc/autostart` with the following content:
 
 ```bash
-@lxpanel --profile LXDE-pi
-@pcmanfm --desktop --profile LXDE-pi
-@xset s off
-@xset s noblank
-@xset -dpms
-@node /home/user/sonos-now-playing/server/server.js
-@chromium-browser --kiosk --incognito http://localhost:8080
+/home/user/sonos-now-playing/run.sh
 ```
 
 ## Hardware

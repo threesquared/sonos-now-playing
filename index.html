@@ -58,7 +58,7 @@
       <div id="title"></div>
     </div>
     <script>
-      function listenForGestures() {
+      function listenForGestures(ws) {
         const gesuredZone = document.getElementById('body');
 
         gesuredZone.addEventListener('touchstart', function(event) {
@@ -74,13 +74,13 @@
 
         function handleGesure() {
           if (touchendX < touchstartX) {
-              alert('left!');
+            ws.send('next');
           }
           if (touchendX > touchstartX) {
-              alert('right!');
+            ws.send('previous');
           }
           if (touchendY == touchstartY) {
-              alert('tap!');
+            ws.send('playpause');
           }
         }
       }
@@ -117,11 +117,13 @@
           console.error('Socket error', err);
           ws.close();
         };
+
+        return ws;
       }
 
       (() => {
-        startWebsocket();
-        listenForGestures();
+        const ws = startWebsocket();
+        listenForGestures(ws);
       })()
     </script>
   </body>

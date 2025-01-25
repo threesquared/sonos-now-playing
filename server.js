@@ -43,6 +43,10 @@ app.ws('/ws', async function(ws, req) {
 
   sonosSpeaker.Events.on(SonosEvents.CurrentTrackUri, trackChangeListener)
 
+  ws.on('message', async function(msg) {
+    console.log('Received message', msg);
+  });
+
   ws.on('close', function() {
     console.log('Websocket client disconnected');
 
