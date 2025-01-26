@@ -54,7 +54,7 @@ app.ws('/ws', async function(ws, req) {
   });
 });
 
-app.use(express.static(path.join(path.resolve(), '../app')));
+app.use('/', express.static(path.resolve(), {index: 'index.html'}));
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
