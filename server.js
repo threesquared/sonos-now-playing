@@ -75,12 +75,22 @@ app.ws('/ws', async (ws) => {
   });
 
   // Handle client disconnect
-  ws.on('close', async (msg) => {
+  ws.on('close', async () => {
     console.log('Websocket client disconnected');
 
     sonosSpeaker.Events.removeListener(SonosEvents.CurrentTrackUri, trackChangeListener);
     sonosSpeaker.Events.removeListener(SonosEvents.CurrentTransportStateSimple, trackChangeListener);
   });
+});
+
+app.get('/doorbell', async (req, res) => {
+  turnOnScreen();
+
+  ws.getWss().clients.forEach(client => client.send({
+    action: `doorbell`
+  }));
+
+  res.send('Done');
 });
 
 app.use('/', express.static(path.resolve(), {index: 'index.html'}));
