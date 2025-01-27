@@ -3,38 +3,47 @@ import expressWs from 'express-ws';
 import path from 'path';
 import { SonosManager, SonosEvents, SonosDevice } from '@svrooij/sonos'
 
+import { turnOnScreen, turnOffScreen } from './util.js';
+
 const app = expressWs(express()).app;
 const manager = new SonosManager()
 
 const PORT = process.env.PORT || 8080;
 const deviceName = process.env.SONOS_DEVICE_NAME || 'Dining Room'
 
-/** @type {SonosDevice} */
-let sonosSpeaker;
+/**
+ * Find a local Sonos speaker with the supplied name
+ *
+ * @returns {SonosDevice}
+ */
+async function initSonosSpeaker() {
+  console.log('Discovering Sonos devices...')
 
-console.log('Discovering sonos devices...')
+  await manager.InitializeWithDiscovery(10);
 
-await manager.InitializeWithDiscovery(10);
-
-manager.Devices.forEach(device => {
-  if (device.Name === deviceName) {
-    sonosSpeaker = device
+  for (const device of manager.Devices) {
+    if (device.Name === deviceName) {
+      return device;
+    }
   }
-})
 
-if (!sonosSpeaker) {
-  console.error('No Sonos device found with name %s', deviceName)
   process.exit(1)
 }
 
-sonosSpeaker.Events.on(SonosEvents.Error, (err) => {
-  console.error('Error subscribing to speaker events', err);
-});
+const sonosSpeaker = await initSonosSpeaker();
 
-app.ws('/ws', async function(ws, req) {
+app.ws('/ws', async (ws) => {
   console.log("Websocket client connected");
 
   ws.send(JSON.stringify(await sonosSpeaker.GetState()));
+
+  const stateChangeListener = async (state) => {
+    if (state == "PLAYING") {
+      turnOnScreen();
+    } else if (state == "STOPPED") {
+      turnOffScreen();
+    }
+  }
 
   const trackChangeListener = async (trachUri) => {
     console.log('Track changed', trachUri);
@@ -42,15 +51,35 @@ app.ws('/ws', async function(ws, req) {
   }
 
   sonosSpeaker.Events.on(SonosEvents.CurrentTrackUri, trackChangeListener)
+  sonosSpeaker.Events.on(SonosEvents.CurrentTransportStateSimple, stateChangeListener)
 
-  ws.on('message', async function(msg) {
-    console.log('Received message', msg);
+  // Handle client message
+  ws.on('message', async (msg) => {
+    switch (msg) {
+      case "next":
+        sonosSpeaker.Next();
+        break;
+
+      case "previous":
+        sonosSpeaker.Previous();
+        break;
+
+      case "playpause":
+        sonosSpeaker.TogglePlayback();
+        break;
+
+      default:
+        console.error('Unknown client message', msg);
+        break;
+    }
   });
 
-  ws.on('close', function() {
+  // Handle client disconnect
+  ws.on('close', async (msg) => {
     console.log('Websocket client disconnected');
 
-    sonosSpeaker.Events.removeListener(SonosEvents.CurrentTrackUri, trackChangeListener)
+    sonosSpeaker.Events.removeListener(SonosEvents.CurrentTrackUri, trackChangeListener);
+    sonosSpeaker.Events.removeListener(SonosEvents.CurrentTransportStateSimple, trackChangeListener);
   });
 });
 
