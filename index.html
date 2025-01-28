@@ -109,6 +109,20 @@
         const ws = new WebSocket('ws://localhost:8080/ws');
 
         ws.onmessage = (message) => {
+          if (message.action === 'info') {
+            const iframe = document.createElement("iframe");
+            iframe.width = "100%";
+            iframe.height = "100%";
+            iframe.frameborder = "0";
+            iframe.allowfullscreen = true;
+            iframe.src = message.url;
+            document.body.appendChild(iframe);
+
+            setInterval(() => {
+              document.body.removeChild(iframe);
+            }, message.time);
+          }
+
           newTrack(JSON.parse(message.data));
         }
 

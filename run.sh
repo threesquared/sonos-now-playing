@@ -8,4 +8,4 @@ npm install
 
 node "${SCRIPT_DIR}/server.js" &
 
-chromium-browser --touch-events=enabled --pull-to-refresh=1 --no-memcheck --noerrdialogs --incognito --start-fullscreen --kiosk "${SCRIPT_DIR}/index.html"
+chromium-browser --touch-events=enabled --pull-to-refresh=1 --no-memcheck --noerrdialogs --incognito --start-fullscreen "${SCRIPT_DIR}/index.html"

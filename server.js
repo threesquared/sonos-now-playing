@@ -83,14 +83,16 @@ app.ws('/ws', async (ws) => {
   });
 });
 
-app.get('/doorbell', async (req, res) => {
+app.get('/info', async (req, res) => {
   turnOnScreen();
 
   ws.getWss().clients.forEach(client => client.send({
-    action: `doorbell`
+    action: `info`,
+    url: req.query.url,
+    time: req.query.time || 10000
   }));
 
-  res.send('Done');
+  res.send('Sent to all clients');
 });
 
 app.use('/', express.static(path.resolve(), {index: 'index.html'}));

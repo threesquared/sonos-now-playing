@@ -7,7 +7,9 @@
 Install dependencies and check out this repository:
 
 ```bash
-sudo apt-get install git chromium-browser
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+
+sudo apt-get install -y nodejs git chromium-browser
 
 git clone https://github.com/threesquared/sonos-now-playing.git
 cd sonos-now-playing
