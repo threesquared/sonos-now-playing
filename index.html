@@ -111,7 +111,7 @@
 
             setInterval(() => {
               document.body.removeChild(iframe);
-            }, message.time);
+            }, message.duration);
           }
 
           newTrack(JSON.parse(message.data));

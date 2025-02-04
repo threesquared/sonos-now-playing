@@ -91,7 +91,7 @@ app.get('/info', async (req, res) => {
   ws.getWss().clients.forEach(client => client.send({
     action: `info`,
     url: req.query.url,
-    time: req.query.time || 10000
+    duration: req.query.duration || 10000
   }));
 
   res.send('Sent to all clients');
