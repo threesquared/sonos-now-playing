@@ -63,6 +63,8 @@
     </div>
     <script>
       function listenForGestures(ws) {
+        document.documentElement.style.cursor = 'none';
+
         const zt = ZingTouch.Region(document.body);
 
         zt.bind(document.body, 'tap', (e) => {
@@ -117,7 +119,7 @@
 
         ws.onclose = function(err) {
           console.log('Socket closed. Attempting to reconnect...', err);
-          setTimeout(startWebsocket, 1000);
+          setTimeout(startWebsocket, 5000);
         };
 
         ws.onerror = function(err) {
