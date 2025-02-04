@@ -100,7 +100,7 @@
         const ws = new WebSocket('ws://localhost:8080/ws');
 
         ws.onmessage = (message) => {
-          if (message.action === 'info') {
+          if (message.action === 'splash') {
             const iframe = document.createElement("iframe");
             iframe.width = "100%";
             iframe.height = "100%";

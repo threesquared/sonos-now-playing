@@ -85,11 +85,11 @@ app.ws('/ws', async (ws) => {
   });
 });
 
-app.get('/info', async (req, res) => {
+app.get('/splash', async (req, res) => {
   turnOnScreen();
 
   ws.getWss().clients.forEach(client => client.send({
-    action: `info`,
+    action: `splash`,
     url: req.query.url,
     duration: req.query.duration || 10000
   }));

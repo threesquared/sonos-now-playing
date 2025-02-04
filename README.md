@@ -9,7 +9,7 @@
 - Turns the screen off when music is not playing
 - Automatically starts on boot and reconnects to Sonos
 - Touch screen controls to play/pause and skip tracks
-- Info endpoint to temporarily show an external URL on the screen (f.ex doorbell camera)
+- Splash endpoint to temporarily show an external URL on the screen (f.ex doorbell camera)
 
 ## Installation
 
@@ -26,7 +26,7 @@ cd sonos-now-playing
 npm install
 ```
 
-## Config
+## Configuration
 
 You can set the following environment variables to configure the application:
 
@@ -41,12 +41,12 @@ Create a file at `~/.config/labwc/autostart` with the following content:
 /home/user/sonos-now-playing/run.sh
 ```
 
-## Info
+## Splash endpoint
 
-To show an external URL on the screen, you can use the info endpoint:
+To show an external URL on the screen, you can use the splash endpoint:
 
 ```bash
-curl http://rpi-ip-address:8080/info?url=https%3A%2F%2Fplacecats.com%2F300%2F300&duration=10000
+curl http://rpi-ip-address:8080/splash?url=https%3A%2F%2Fplacecats.com%2F300%2F300&duration=10000
 ```
 
 This will show the URL for 10 seconds before returning to the Sonos display.
