@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="desc">
-    <meta name="keywords" content="content">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zingtouch/1.0.6/zingtouch.min.js" integrity="sha512-HmaXasRYOQJEXJWYwYCMcIA/XnPtW9WPvaBVWE2mQP6K31sRdcgaYUyB//P5540J4hFqMBcj6vkDEEGkwHkYdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <title>Now Playing</title>
     <style>
@@ -63,30 +63,19 @@
     </div>
     <script>
       function listenForGestures(ws) {
-        const gesuredZone = document.getElementById('body');
+        const zt = ZingTouch.Region(document.body);
 
-        gesuredZone.addEventListener('touchstart', function(event) {
-            touchstartX = event.screenX;
-            touchstartY = event.screenY;
+        zt.bind(document.body, 'tap', (e) => {
+          ws.send('playpause');
         }, false);
 
-        gesuredZone.addEventListener('touchend', function(event) {
-            touchendX = event.screenX;
-            touchendY = event.screenY;
-            handleGesure();
-        }, false);
-
-        function handleGesure() {
-          if (touchendX < touchstartX) {
+        zt.bind(document.body, 'swipe', (e) => {
+          if (e.detail.data[0].currentDirection < 45) {
             ws.send('next');
-          }
-          if (touchendX > touchstartX) {
+          } else {
             ws.send('previous');
           }
-          if (touchendY == touchstartY) {
-            ws.send('playpause');
-          }
-        }
+        }, false);
       }
 
       function newTrack(sonosData) {

@@ -2,6 +2,15 @@
 
 > Display current playing artwork from Sonos on a Raspberry Pi screen
 
+## Features
+
+- Displays the current playing artwork and track title from Sonos
+- Animated transitions between tracks
+- Turns the screen off when music is not playing
+- Automatically starts on boot and reconnects to Sonos
+- Touch screen controls to play/pause and skip tracks
+- Info endpoint to temporarily show an external URL on the screen (f.ex doorbell camera)
+
 ## Installation
 
 Install dependencies and check out this repository:
@@ -27,7 +36,7 @@ Create a file at `~/.config/labwc/autostart` with the following content:
 
 ## Hardware
 
-The hardware I used:
+The hardware I used in my build:
 
 - [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
 - [HyperPixel 4.0 Square Touch](https://shop.pimoroni.com/products/hyperpixel-4-square?variant=30138251444307)

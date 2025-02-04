@@ -27,6 +27,8 @@ async function initSonosSpeaker() {
     }
   }
 
+  console.error(`Could not find Sonos device with name "${deviceName}"`)
+
   process.exit(1)
 }
 
